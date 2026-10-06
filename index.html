@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#EBEFF3">
+<title>Reader — ingliz tilida o'qish</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Literata:opsz,wght@7..72,400;7..72,600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#EBEFF3; --card:#FFFFFF; --ink:#17202E; --muted:#586377; --line:#D5DBE3;
+  --accent:#1F5A8C; --accent-ink:#FFFFFF; --now:#FFDF8A;
+  --serif:'Literata',Georgia,'Times New Roman',serif;
+  --sans:system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+}
+@media (prefers-color-scheme:dark){
+  :root{--bg:#10151D; --card:#182029; --ink:#E7EBF1; --muted:#98A3B5; --line:#2A3441;
+        --accent:#7DB4E8; --accent-ink:#0E1620; --now:#6B5A1C;}
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 var(--sans);
+  padding:env(safe-area-inset-top,0) 0 calc(64px + env(safe-area-inset-bottom,0)) 0}
+main{max-width:640px;margin:0 auto;padding:16px}
+h1{font:600 22px/1.25 var(--serif);margin:8px 0 4px}
+p.sub{color:var(--muted);margin:0 0 16px}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,.w:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.view{display:none}.view.on{display:block}
+
+/* Qidirish */
+.searchbar{display:flex;gap:8px;margin-bottom:12px}
+.searchbar input{flex:1;min-width:0;padding:12px 14px;border:1px solid var(--line);border-radius:10px;
+  background:var(--card);color:var(--ink);font:inherit}
+.btn{border:0;background:var(--accent);color:var(--accent-ink);padding:12px 16px;border-radius:10px;font-weight:600}
+.btn.ghost{background:transparent;color:var(--ink);border:1px solid var(--line)}
+.btn.small{padding:8px 12px;font-size:14px}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:16px}
+.chip{border:1px solid var(--line);background:transparent;border-radius:999px;padding:6px 12px;font-size:14px}
+.result{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--line);
+  border-radius:10px;padding:12px 14px;margin-bottom:8px}
+.result b{display:block;font-family:var(--serif);font-weight:600}
+.result span{color:var(--muted);font-size:14px}
+.note{color:var(--muted);padding:12px 0}
+
+/* O'qish */
+.bookhead{margin-bottom:12px}
+.bookhead h1{margin:0}
+.bookhead span{color:var(--muted);font-size:14px}
+.bar{height:4px;background:var(--line);border-radius:2px;margin:10px 0 16px;overflow:hidden}
+.bar i{display:block;height:100%;width:0;background:var(--accent)}
+#text{font:400 20px/1.8 var(--serif);min-height:50vh}
+#text p{margin:0 0 1.1em;max-width:62ch}
+.w{cursor:pointer;border-radius:3px;padding:0 1px;margin:0 -1px}
+.w:hover{background:color-mix(in srgb,var(--accent) 14%,transparent)}
+.w.saved{text-decoration:underline dotted var(--accent);text-underline-offset:4px;text-decoration-thickness:2px}
+.w.now{background:var(--now)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:16px 0}
+.controls .grow{flex:1}
+select{padding:9px 10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;font-size:14px}
+.levelrow{display:flex;align-items:center;gap:8px;margin-bottom:8px;color:var(--muted);font-size:14px}
+.pager{display:flex;align-items:center;justify-content:space-between;gap:8px}
+.pager span{color:var(--muted);font-size:14px}
+
+/* Lug'at */
+.vhead{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:12px}
+.vrow{background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px 14px;margin-bottom:8px;
+  display:grid;grid-template-columns:1fr auto;gap:4px 8px}
+.vrow b{font-family:var(--serif);font-size:18px;font-weight:600}
+.vrow .tr{color:var(--accent);font-weight:600}
+.vrow .ctx{grid-column:1/-1;color:var(--muted);font-size:14px;font-family:var(--serif)}
+.vrow .acts{display:flex;gap:6px;grid-row:1/3;grid-column:2}
+.icon{border:1px solid var(--line);background:transparent;border-radius:8px;padding:6px 10px;font-size:14px}
+
+/* Pastki menyu */
+nav{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);
+  display:flex;padding-bottom:env(safe-area-inset-bottom,0);z-index:5}
+nav button{flex:1;border:0;background:transparent;padding:14px 8px;font-weight:600;color:var(--muted)}
+nav button[aria-current=true]{color:var(--accent);box-shadow:inset 0 3px 0 var(--accent)}
+
+/* So'z oynasi */
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:10;background:var(--card);
+  border-radius:18px 18px 0 0;border-top:1px solid var(--line);box-shadow:0 -8px 30px rgba(0,0,0,.18);
+  padding:18px 16px calc(16px + env(safe-area-inset-bottom,0));max-width:640px;margin:0 auto;
+  transform:translateY(110%);transition:transform .22s ease}
+.sheet.open{transform:translateY(0)}
+.sheet .word{font:600 26px/1.2 var(--serif)}
+.sheet .tr{font-size:20px;color:var(--accent);font-weight:600;margin:6px 0;min-height:30px}
+.sheet .ctx{color:var(--muted);font:400 15px/1.6 var(--serif);margin:8px 0}
+.sheet .gtr{font-size:15px;margin:4px 0 8px}
+.sheet .row{display:flex;flex-wrap:wrap;gap:8px;margin-top:10px}
+@media (prefers-reduced-motion:reduce){.sheet{transition:none}}
+</style>
+</head>
+<body>
+
+<main>
+  <!-- KITOBLAR -->
+  <section class="view on" id="v-books">
+    <h1>Kitob tanlang</h1>
+    <p class="sub">Project Gutenberg'dagi bepul klassik asarlar. Nomini ingliz tilida yozing.</p>
+    <form class="searchbar" id="searchForm">
+      <input id="q" type="search" placeholder="masalan: usher, sherlock, alice" autocomplete="off" aria-label="Asar nomi">
+      <button class="btn" type="submit">Qidirish</button>
+    </form>
+    <div class="chips" id="chips">
+      <button class="chip" type="button">Fall of the House of Usher</button>
+      <button class="chip" type="button">Sherlock Holmes</button>
+      <button class="chip" type="button">Alice in Wonderland</button>
+      <button class="chip" type="button">Tell-Tale Heart</button>
+    </div>
+    <div id="results"></div>
+  </section>
+
+  <!-- O'QISH -->
+  <section class="view" id="v-read">
+    <div id="emptyRead" class="note">Avval «Kitoblar» bo'limidan asar tanlang.</div>
+    <div id="reader" hidden>
+      <div class="bookhead"><h1 id="bTitle"></h1><span id="bAuthor"></span></div>
+      <div class="bar"><i id="progress"></i></div>
+      <div class="levelrow"><label for="level">Daraja</label>
+        <select id="level">
+          <option value="a1">A1: eng sodda</option>
+          <option value="a2">A2: sodda</option>
+          <option value="orig">Original (qiyin)</option>
+        </select></div>
+      <div class="note" id="simpNote" hidden></div>
+      <article id="text" aria-live="polite"></article>
+      <div class="controls">
+        <button class="btn" id="playBtn" type="button">Ovozli o'qish</button>
+        <select id="rate" aria-label="Tezlik">
+          <option value="0.7">Sekin</option>
+          <option value="0.85" selected>O'rtacha</option>
+          <option value="1">Tez</option>
+        </select>
+      </div>
+      <div class="pager">
+        <button class="btn ghost small" id="prev" type="button">Oldingi</button>
+        <span id="pageInfo"></span>
+        <button class="btn ghost small" id="next" type="button">Keyingi</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- LUG'AT -->
+  <section class="view" id="v-vocab">
+    <div class="vhead">
+      <h1 id="vCount">Lug'at</h1>
+      <button class="btn small" id="exportBtn" type="button">CSV yuklab olish</button>
+    </div>
+    <div id="vList"></div>
+  </section>
+</main>
+
+<nav>
+  <button data-view="books" aria-current="true">Kitoblar</button>
+  <button data-view="read">O'qish</button>
+  <button data-view="vocab">Lug'at</button>
+</nav>
+
+<!-- So'z oynasi -->
+<div class="sheet" id="sheet" role="dialog" aria-label="So'z tarjimasi">
+  <div class="word" id="sWord"></div>
+  <div class="tr" id="sTr"></div>
+  <div class="ctx" id="sCtx"></div>
+  <div class="gtr" id="sGtr"></div>
+  <div class="row">
+    <button class="btn small" id="sSay" type="button">So'zni tinglash</button>
+    <button class="btn ghost small" id="sSaySent" type="button">Gapni tinglash</button>
+    <button class="btn ghost small" id="sTrSent" type="button">Gapni tarjima qil</button>
+    <button class="btn ghost small" id="sSave" type="button"></button>
+    <button class="btn ghost small" id="sClose" type="button">Yopish</button>
+  </div>
+</div>
+
+<script>
+const $ = s => document.querySelector(s);
+const store = {
+  get(k, d){ try{ const v = JSON.parse(localStorage.getItem(k)); return v ?? d; }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+};
+const clean = w => w.toLowerCase().replace(/’/g, "'").replace(/^['-]+|['-]+$/g, '');
+
+let vocab = store.get('vocab', {});      // {word:{tr, ctx, book, t}}
+let trCache = store.get('tr', {});       // tarjima keshi
+let book = null, pages = [], pageNo = 0;
+let spans = [], starts = [], pageText = '';
+let cur = null;                          // ochiq so'z {word, sentence, tr}
+
+/* ---------- Bo'limlar ---------- */
+function showView(name){
+  document.querySelectorAll('.view').forEach(v => v.classList.toggle('on', v.id === 'v-' + name));
+  document.querySelectorAll('nav button').forEach(b => b.setAttribute('aria-current', b.dataset.view === name));
+  if(name === 'vocab') renderVocab();
+  if(name !== 'read') closeSheet();
+  window.scrollTo(0, 0);
+}
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => showView(b.dataset.view));
+
+/* ---------- Qidirish ---------- */
+async function api(params){
+  let r;
+  try{ r = await fetch('/.netlify/functions/book?' + params); }
+  catch{ throw new Error('Server bilan aloqa yo\'q. Ilova Netlify\'ga joylangan bo\'lishi kerak.'); }
+  let d; try{ d = await r.json(); }catch{ throw new Error('Funksiya topilmadi. Netlify\'da netlify/functions papkasi yuklanganini tekshiring.'); }
+  if(!r.ok) throw new Error(d.error || 'Xatolik');
+  return d;
+}
+
+async function search(q){
+  const box = $('#results');
+  box.innerHTML = '<div class="note">Qidirilmoqda…</div>';
+  try{
+    const d = await api('q=' + encodeURIComponent(q));
+    box.textContent = '';
+    if(!d.results.length){ box.innerHTML = '<div class="note">Hech narsa topilmadi. Boshqa so\'z bilan urinib ko\'ring.</div>'; return; }
+    d.results.forEach(b => {
+      const el = document.createElement('button');
+      el.className = 'result'; el.type = 'button';
+      el.innerHTML = '<b></b><span></span>';
+      el.firstChild.textContent = b.title;
+      el.lastChild.textContent = b.author;
+      el.onclick = () => openBook(b.id);
+      box.appendChild(el);
+    });
+  }catch(e){ box.innerHTML = ''; const n = document.createElement('div'); n.className = 'note'; n.textContent = e.message; box.appendChild(n); }
+}
+$('#searchForm').onsubmit = e => { e.preventDefault(); const q = $('#q').value.trim(); if(q) search(q); };
+document.querySelectorAll('#chips .chip').forEach(c => c.onclick = () => { $('#q').value = c.textContent; search(c.textContent); });
+
+/* ---------- Kitobni ochish ---------- */
+function paginate(text){
+  const raw = text.split(/\n\s*\n/).map(p => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+  const paras = [];
+  raw.forEach(p => {
+    if(p.split(' ').length <= 120){ paras.push(p); return; }
+    const sents = p.match(/[^.!?]+[.!?]+["”’']*\s*|[^.!?]+$/g) || [p];
+    let chunk = '', n = 0;
+    sents.forEach(x => { chunk += x; n += x.split(' ').length; if(n >= 70){ paras.push(chunk.trim()); chunk = ''; n = 0; } });
+    if(chunk.trim()) paras.push(chunk.trim());
+  });
+  pages = []; let page = [], n = 0;
+  for(const p of paras){
+    page.push(p); n += p.split(' ').length;
+    if(n >= 120){ pages.push(page); page = []; n = 0; }
+  }
+  if(page.length) pages.push(page);
+}
+
+async function openBook(id, startPage){
+  showView('read');
+  $('#emptyRead').hidden = false; $('#emptyRead').textContent = 'Kitob yuklanmoqda…'; $('#reader').hidden = true;
+  try{
+    const d = await api('id=' + id);
+    book = { id: d.id, title: d.title, author: d.author };
+    paginate(d.text);
+    const saved = store.get('pos', {});
+    pageNo = Math.min(startPage ?? saved[id] ?? 0, pages.length - 1);
+    $('#bTitle').textContent = book.title; $('#bAuthor').textContent = book.author;
+    $('#emptyRead').hidden = true; $('#reader').hidden = false;
+    store.set('last', id);
+    renderPage();
+  }catch(e){ $('#emptyRead').textContent = e.message; }
+}
+
+let shown = [], renderId = 0, simp = store.get('simp', {}), inflight = {};
+const level = () => $('#level').value;
+
+function getSimple(idx, lv){
+  const bid = book.id, key = bid + ':' + idx + ':' + lv;
+  if(simp[key]) return Promise.resolve(simp[key]);
+  if(inflight[key]) return inflight[key];
+  const src = pages[idx].join('\n\n');
+  return inflight[key] = (async () => {
+    try{
+      let r;
+      try{ r = await fetch('/.netlify/functions/simplify', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ text: src, level: lv }) }); }
+      catch{ throw new Error('Server bilan aloqa yo\'q.'); }
+      const d = await r.json().catch(() => ({}));
+      if(!r.ok) throw new Error(d.error || 'Soddalashtirib bo\'lmadi.');
+      const paras = d.text.split(/\n\s*\n/).map(p => p.replace(/\s+/g, ' ').trim()).filter(Boolean);
+      simp[key] = paras; store.set('simp', simp);
+      return paras;
+    }finally{ delete inflight[key]; }
+  })();
+}
+
+function updateNav(){
+  $('#pageInfo').textContent = (pageNo + 1) + ' / ' + pages.length;
+  $('#progress').style.width = ((pageNo + 1) / pages.length * 100) + '%';
+  $('#prev').disabled = pageNo === 0; $('#next').disabled = pageNo >= pages.length - 1;
+  const p = store.get('pos', {}); p[book.id] = pageNo; store.set('pos', p);
+}
+
+function draw(paras){
+  shown = paras;
+  const box = $('#text'); box.textContent = '';
+  spans = []; starts = []; let pos = 0; const parts = [];
+  paras.forEach((p, pi) => {
+    const el = document.createElement('p');
+    const re = /[A-Za-z][A-Za-z'’-]*|[^A-Za-z]+/g; let m;
+    while((m = re.exec(p))){
+      if(/^[A-Za-z]/.test(m[0])){
+        const s = document.createElement('span');
+        s.className = 'w'; s.textContent = m[0]; s.dataset.p = pi; s.dataset.o = m.index;
+        if(vocab[clean(m[0])]) s.classList.add('saved');
+        el.appendChild(s); spans.push(s); starts.push(pos + m.index);
+      }else el.appendChild(document.createTextNode(m[0]));
+    }
+    parts.push(p); pos += p.length + 1; box.appendChild(el);
+  });
+  pageText = parts.join(' ');
+}
+
+async function renderPage(){
+  stopSpeech(); closeSheet();
+  const my = ++renderId, lv = level(), note = $('#simpNote');
+  note.hidden = true; updateNav();
+  let paras = pages[pageNo];
+  if(lv !== 'orig'){
+    $('#text').innerHTML = '<div class="note">Matn soddalashtirilmoqda…</div>';
+    try{ paras = await getSimple(pageNo, lv); }
+    catch(e){ note.textContent = e.message + ' Original matn ko\'rsatilmoqda.'; note.hidden = false; }
+    if(my !== renderId) return;
+  }
+  draw(paras);
+  if(lv !== 'orig' && pageNo + 1 < pages.length) getSimple(pageNo + 1, lv).catch(() => {});
+}
+function go(d){ const n = pageNo + d; if(n < 0 || n >= pages.length) return; pageNo = n; renderPage(); window.scrollTo(0, 0); }
+$('#prev').onclick = () => go(-1); $('#next').onclick = () => go(1);
+
+/* ---------- Ovoz ---------- */
+let readToken = 0;
+function pickVoice(){
+  const vs = speechSynthesis.getVoices();
+  return vs.find(v => /^en[-_]US/i.test(v.lang) && /Samantha|Google|Natural|Aria|Jenny/i.test(v.name))
+      || vs.find(v => /^en/i.test(v.lang));
+}
+function say(text, rate){
+  speechSynthesis.cancel();
+  const u = new SpeechSynthesisUtterance(text);
+  u.lang = 'en-US'; u.rate = rate || 0.9;
+  const v = pickVoice(); if(v) u.voice = v;
+  speechSynthesis.speak(u);
+  return u;
+}
+function mark(i){
+  document.querySelectorAll('.w.now').forEach(s => s.classList.remove('now'));
+  if(i >= 0 && spans[i]){ spans[i].classList.add('now'); spans[i].scrollIntoView({block:'nearest', behavior:'smooth'}); }
+}
+function stopSpeech(){ readToken++; if('speechSynthesis' in window) speechSynthesis.cancel(); mark(-1); $('#playBtn').textContent = 'Ovozli o\'qish'; }
+function startReading(){
+  if(!('speechSynthesis' in window)){ alert('Brauzeringiz ovozli o\'qishni qo\'llab-quvvatlamaydi.'); return; }
+  const my = ++readToken;
+  $('#playBtn').textContent = 'To\'xtatish';
+  const u = say(pageText, +$('#rate').value);
+  u.onboundary = ev => {
+    if(my !== readToken) return;
+    if(ev.name && ev.name !== 'word') return;
+    let i = starts.length - 1; while(i > 0 && starts[i] > ev.charIndex) i--;
+    mark(i);
+  };
+  u.onend = async () => {
+    if(my !== readToken) return;
+    if(pageNo < pages.length - 1){ pageNo++; await renderPage(); window.scrollTo(0, 0); startReading(); }
+    else stopSpeech();
+  };
+}
+function readPage(){
+  if('speechSynthesis' in window && speechSynthesis.speaking){ stopSpeech(); return; }
+  startReading();
+}
+$('#playBtn').onclick = readPage;
+if('speechSynthesis' in window) speechSynthesis.onvoiceschanged = () => {};
+
+/* ---------- Tarjima ---------- */
+async function translate(text){
+  const key = text.toLowerCase();
+  if(trCache[key]) return trCache[key];
+  const r = await fetch('https://api.mymemory.translated.net/get?langpair=en|uz&q=' + encodeURIComponent(text));
+  const d = await r.json();
+  const t = d?.responseData?.translatedText || '';
+  if(!t || /MYMEMORY WARNING|QUERY LENGTH|INVALID/i.test(t)) throw new Error('Tarjima olinmadi. Birozdan so\'ng urinib ko\'ring.');
+  trCache[key] = t; store.set('tr', trCache);
+  return t;
+}
+function sentenceAt(str, off){
+  let a = off; while(a > 0 && !/[.!?]/.test(str[a - 1])) a--;
+  let b = off; while(b < str.length && !/[.!?]/.test(str[b])) b++;
+  return str.slice(a, Math.min(b + 1, str.length)).trim();
+}
+
+/* ---------- So'z oynasi ---------- */
+$('#text').addEventListener('click', e => {
+  const s = e.target.closest('.w'); if(s) openWord(s);
+});
+async function openWord(s){
+  const word = clean(s.textContent);
+  const sentence = sentenceAt(shown[+s.dataset.p], +s.dataset.o);
+  cur = { word, sentence, tr: vocab[word]?.tr || '' };
+  $('#sWord').textContent = word;
+  $('#sCtx').textContent = sentence;
+  $('#sGtr').textContent = '';
+  $('#sTr').textContent = cur.tr || 'Tarjima qilinmoqda…';
+  $('#sheet').classList.add('open');
+  if('speechSynthesis' in window && speechSynthesis.speaking === false) say(word, 0.8);
+  if(!cur.tr){
+    try{
+      cur.tr = await translate(word);
+      if(cur.word === word){ $('#sTr').textContent = cur.tr; saveWord(); }
+    }catch(err){ if(cur.word === word) $('#sTr').textContent = err.message; }
+  }
+  updateSaveBtn();
+}
+function saveWord(){
+  if(!cur || !cur.tr) return;
+  if(!vocab[cur.word]) vocab[cur.word] = { tr: cur.tr, ctx: cur.sentence, book: book ? book.title : '', t: Date.now() };
+  store.set('vocab', vocab); refreshMarks(); updateSaveBtn();
+}
+function updateSaveBtn(){ if(cur) $('#sSave').textContent = vocab[cur.word] ? 'Lug\'atdan olib tashlash' : 'Lug\'atga qo\'shish'; }
+function refreshMarks(){ spans.forEach(s => s.classList.toggle('saved', !!vocab[clean(s.textContent)])); }
+function closeSheet(){ $('#sheet').classList.remove('open'); cur = null; }
+$('#sClose').onclick = closeSheet;
+$('#sSay').onclick = () => cur && say(cur.word, 0.8);
+$('#sSaySent').onclick = () => cur && say(cur.sentence, +$('#rate').value);
+$('#sTrSent').onclick = async () => {
+  if(!cur) return; const sent = cur.sentence;
+  $('#sGtr').textContent = 'Tarjima qilinmoqda…';
+  try{ const t = await translate(sent.slice(0, 450)); if(cur && cur.sentence === sent) $('#sGtr').textContent = t; }
+  catch(err){ $('#sGtr').textContent = err.message; }
+};
+$('#sSave').onclick = () => {
+  if(!cur) return;
+  if(vocab[cur.word]){ delete vocab[cur.word]; store.set('vocab', vocab); refreshMarks(); updateSaveBtn(); }
+  else saveWord();
+};
+
+/* ---------- Lug'at ---------- */
+function renderVocab(){
+  const items = Object.entries(vocab).sort((a, b) => b[1].t - a[1].t);
+  $('#vCount').textContent = 'Lug\'at: ' + items.length + ' ta so\'z';
+  $('#exportBtn').hidden = !items.length;
+  const box = $('#vList'); box.textContent = '';
+  if(!items.length){ box.innerHTML = '<div class="note">Hali so\'z yo\'q. O\'qishda notanish so\'zni bossangiz, shu yerga tushadi.</div>'; return; }
+  items.forEach(([w, v]) => {
+    const row = document.createElement('div'); row.className = 'vrow';
+    const b = document.createElement('b'); b.textContent = w;
+    const acts = document.createElement('div'); acts.className = 'acts';
+    const say1 = document.createElement('button'); say1.className = 'icon'; say1.textContent = 'Tinglash'; say1.onclick = () => say(w, 0.8);
+    const del = document.createElement('button'); del.className = 'icon'; del.textContent = 'O\'chirish';
+    del.onclick = () => { delete vocab[w]; store.set('vocab', vocab); renderVocab(); };
+    acts.append(say1, del);
+    const tr = document.createElement('div'); tr.className = 'tr'; tr.textContent = v.tr;
+    const ctx = document.createElement('div'); ctx.className = 'ctx'; ctx.textContent = v.ctx;
+    row.append(b, acts, tr, ctx); box.appendChild(row);
+  });
+}
+$('#exportBtn').onclick = () => {
+  const q = s => '"' + String(s ?? '').replace(/"/g, '""') + '"';
+  const rows = [['word', 'translation', 'sentence', 'book'].join(',')]
+    .concat(Object.entries(vocab).map(([w, v]) => [q(w), q(v.tr), q(v.ctx), q(v.book)].join(',')));
+  const blob = new Blob(['\ufeff' + rows.join('\n')], { type: 'text/csv;charset=utf-8' });
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'lugat.csv';
+  document.body.appendChild(a); a.click(); a.remove();
+};
+
+$('#level').value = store.get('level', 'a1');
+$('#level').onchange = () => { store.set('level', level()); if(book) renderPage(); };
+
+/* ---------- Boshlash: oxirgi kitobni davom ettirish ---------- */
+const lastId = store.get('last', null);
+if(lastId) openBook(lastId);
+</script>
+</body>
+</html>
