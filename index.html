@@ -44,6 +44,8 @@ button:focus-visible,input:focus-visible,select:focus-visible,.w:focus-visible{o
 .result b{display:block;font-family:var(--serif);font-weight:600}
 .result span{color:var(--muted);font-size:14px}
 .note{color:var(--muted);padding:12px 0}
+h2.grp{font:600 17px/1.3 var(--serif);margin:22px 0 8px}
+h2.grp small{font:400 14px var(--sans);color:var(--muted);display:block;margin-top:2px}
 
 /* O'qish */
 .bookhead{margin-bottom:12px}
@@ -100,7 +102,9 @@ nav button[aria-current=true]{color:var(--accent);box-shadow:inset 0 3px 0 var(-
   <!-- KITOBLAR -->
   <section class="view on" id="v-books">
     <h1>Kitob tanlang</h1>
-    <p class="sub">Project Gutenberg'dagi bepul klassik asarlar. Nomini ingliz tilida yozing.</p>
+    <p class="sub">Bepul klassik asarlar. Boshlovchi bo'lsangiz, birinchi guruhdan boshlang. Qaysi kitobni tanlamang, o'qishda «Daraja: A1» sodda tilga o'tkazib beradi.</p>
+    <div id="catalog"></div>
+    <h2 class="grp">Boshqa asar qidirish<small>Nomini ingliz tilida yozing</small></h2>
     <form class="searchbar" id="searchForm">
       <input id="q" type="search" placeholder="masalan: usher, sherlock, alice" autocomplete="off" aria-label="Asar nomi">
       <button class="btn" type="submit">Qidirish</button>
@@ -229,6 +233,53 @@ async function search(q){
 }
 $('#searchForm').onsubmit = e => { e.preventDefault(); const q = $('#q').value.trim(); if(q) search(q); };
 document.querySelectorAll('#chips .chip').forEach(c => c.onclick = () => { $('#q').value = c.textContent; search(c.textContent); });
+
+const CATALOG = [
+  { g: 'Boshlovchilar uchun', d: 'Bolalar ertaklari: sodda til, qiziqarli voqea', items: [
+    [11, "Alice's Adventures in Wonderland", "Quyon inidan pastga tushib ketgan qizning g'alati sarguzashti"],
+    [55, 'The Wonderful Wizard of Oz', "Dorothy sehrgar shahar sari yo'lga chiqadi"],
+    [16, 'Peter Pan', "Hech qachon katta bo'lmaydigan bola haqida"],
+    [236, 'The Jungle Book', "O'rmonda bo'rilar orasida o'sgan bola Mowgli"],
+    [2591, "Grimms' Fairy Tales", "Yuzlab qisqa ertaklar to'plami (katta kitob)"]
+  ]},
+  { g: 'Sarguzasht', d: 'Voqeasi tez, tushunish oson', items: [
+    [120, 'Treasure Island', 'Dengiz qaroqchilari va xazina xaritasi'],
+    [74, 'The Adventures of Tom Sawyer', "Mississippi bo'yidagi sho'x bola"],
+    [215, 'The Call of the Wild', 'Uy iti yovvoyi tabiatda'],
+    [103, 'Around the World in Eighty Days', "80 kunda dunyoni aylanib chiqish garovi"],
+    [35, 'The Time Machine', 'Kelajakka sayohat qiluvchi olim']
+  ]},
+  { g: 'Sirli va dahshatli', d: 'Detektiv va qo\'rqinchli hikoyalar', items: [
+    [1661, 'The Adventures of Sherlock Holmes', 'Mashhur detektivning qisqa hikoyalari'],
+    [2852, 'The Hound of the Baskervilles', 'Sherlock Holmes va sirli ulkan it'],
+    [43, 'Dr Jekyll and Mr Hyde', 'Bir odamning ikki yuzi (qisqa, mashhur)'],
+    [84, 'Frankenstein', 'Olim yaratgan maxluq haqida'],
+    [345, 'Dracula', 'Graf Drakula haqida dahshatli roman'],
+    [932, 'The Fall of the House of Usher', "Edgar Po: qadimiy uy va sirli kasallik (qiyin)"]
+  ]},
+  { g: 'Klassika', d: 'Til qiyinroq, mashhur asarlar', items: [
+    [46, 'A Christmas Carol', "Xasis Skrudjni ruhlar o'zgartiradi (qisqa)"],
+    [113, 'The Secret Garden', "Yopiq bog'ni topgan qizcha"],
+    [1342, 'Pride and Prejudice', 'Mashhur sevgi romani'],
+    [174, 'The Picture of Dorian Gray', 'Yoshlik va portret haqida (qiyin)']
+  ]}
+];
+function renderCatalog(){
+  const box = $('#catalog');
+  CATALOG.forEach(grp => {
+    const h = document.createElement('h2'); h.className = 'grp';
+    h.append(grp.g); const sm = document.createElement('small'); sm.textContent = grp.d; h.appendChild(sm);
+    box.appendChild(h);
+    grp.items.forEach(([id, title, desc]) => {
+      const el = document.createElement('button'); el.className = 'result'; el.type = 'button';
+      el.innerHTML = '<b></b><span></span>';
+      el.firstChild.textContent = title; el.lastChild.textContent = desc;
+      el.onclick = () => openBook(id);
+      box.appendChild(el);
+    });
+  });
+}
+renderCatalog();
 
 /* ---------- Kitobni ochish ---------- */
 function paginate(text){
